@@ -35,4 +35,10 @@ public class Day02SolverTests
         string solution = Day02Solver.SolvePart2(input);
         solution.Should().Be(correctSolution);
     }
+
+    [Fact]
+    public void Implements_IPuzzleSolver()
+    {
+        typeof(Day02Solver).Should().Implement(typeof(IPuzzleSolver));
+    }
 }
