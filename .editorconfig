@@ -1,0 +1,26 @@
+# Not root to allow custom, higher-level .editorconfig to flow through :)
+
+# --------------------------------- Default ---------------------------------- #
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+end_of_line = lf
+insert_final_newline = true
+ij_visual_guides = 80, 120
+
+# ------------------------------- Simple rules ------------------------------- #
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.sln]
+end_of_line = crlf
+indent_style = tab
+
+[*.{csproj,xml}]
+indent_size = 2
+ij_xml_space_inside_empty_tag = true
+ij_xml_attribute_wrap = off

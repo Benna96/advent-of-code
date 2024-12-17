@@ -1,0 +1,6 @@
+# Build
+[Oo]bj/
+[Bb]in/
+
+# User-specific
+*.user
