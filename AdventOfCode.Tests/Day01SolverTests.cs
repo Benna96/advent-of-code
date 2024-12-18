@@ -1,44 +1,19 @@
 namespace AdventOfCode.Tests;
 
-public class Day01SolverTests
+public class Day01SolverTests : PuzzleSolverTestsBase<Day01SolverTests, Day01Solver>, IPuzzleSolverTests
 {
-    [Fact]
-    public void Solves_part_1_correctly()
-    {
-        const string input = """
-                             3   4
-                             4   3
-                             2   5
-                             1   3
-                             3   9
-                             3   3
-                             """;
-        const string correctSolution = "11";
+    static TheoryData<(string input, string solution)> IPuzzleSolverTests.Part1TestCases
+        => [(Input, "11")];
 
-        string solution = Day01Solver.SolvePart1(input);
-        solution.Should().Be(correctSolution);
-    }
+    static TheoryData<(string input, string solution)> IPuzzleSolverTests.Part2TestCases
+        => [(Input, "31")];
 
-    [Fact]
-    public void Solves_part_2_correctly()
-    {
-        const string input = """
-                             3   4
-                             4   3
-                             2   5
-                             1   3
-                             3   9
-                             3   3
-                             """;
-        const string correctSolution = "31";
-
-        string solution = Day01Solver.SolvePart2(input);
-        solution.Should().Be(correctSolution);
-    }
-
-    [Fact]
-    public void Implements_IPuzzleSolver()
-    {
-        typeof(Day01Solver).Should().Implement(typeof(IPuzzleSolver));
-    }
+    private const string Input = """
+                                 3   4
+                                 4   3
+                                 2   5
+                                 1   3
+                                 3   9
+                                 3   3
+                                 """;
 }
