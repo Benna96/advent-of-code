@@ -6,6 +6,8 @@ namespace AdventOfCode;
 
 public class Day02Solver : IPuzzleSolver
 {
+    public static PuzzleMetadata LinkedPuzzle { get; } = new(Day: 2);
+
     public static string SolvePart1(string input)
     {
         var levelReports = ReadLevelReportsFrom(input);
