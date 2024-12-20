@@ -6,6 +6,8 @@ namespace AdventOfCode;
 
 public class Day01Solver : IPuzzleSolver
 {
+    public static PuzzleMetadata LinkedPuzzle { get; } = new(Day: 1);
+
     public static string SolvePart1(string input)
     {
         List<int> leftIds = [];
