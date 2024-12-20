@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AdventOfCode;
 
-public class Day01Solver
+public class Day01Solver : IPuzzleSolver
 {
     public static string SolvePart1(string input)
     {
