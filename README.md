@@ -27,3 +27,5 @@ and send very few real requests while developing the structure.
 
 ## Credits
 - [Eric Wastl](https://was.tl/) for making [Advent of Code](https://adventofcode.com) in the first place
+- [viceroypenguin](https://github.com/viceroypenguin) for providing [a template](https://github.com/viceroypenguin/adventofcode.template)
+  I've drawn heavy inspiration from for the runner part of the project
