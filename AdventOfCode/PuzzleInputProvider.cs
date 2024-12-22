@@ -4,10 +4,12 @@ namespace AdventOfCode;
 
 public static class PuzzleInputProvider
 {
+    public static readonly string InputFolder = "Inputs";
+
     private static string GetPathForPuzzle(PuzzleMetadata puzzle)
     {
         var zeroPadded = $"{puzzle.Day:00}";
-        var path = Path.Join("Inputs", $"{zeroPadded}.txt");
+        var path = Path.Join(InputFolder, $"{zeroPadded}.txt");
         return path;
     }
 

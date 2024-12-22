@@ -1,7 +1,23 @@
+using System.IO;
+using System.Linq;
+
 namespace AdventOfCode.Tests;
 
-public class PuzzleInputProviderTests
+public class PuzzleInputProviderTests : IDisposable
 {
+    private readonly string[] _inputFilesAtStart
+        = Directory.GetFiles(PuzzleInputProvider.InputFolder);
+
+    public void Dispose()
+    {
+        var inputFilesAtEnd = Directory.GetFiles(PuzzleInputProvider.InputFolder);
+        foreach (var inputFile in inputFilesAtEnd)
+        {
+            if (!_inputFilesAtStart.Contains(inputFile))
+                File.Delete(inputFile);
+        }
+    }
+
     [Fact]
     public void Finds_existing_puzzle_input()
     {
