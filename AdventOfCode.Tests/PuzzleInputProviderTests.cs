@@ -1,15 +1,30 @@
 using System.IO;
 using System.Linq;
+using System.Net;
+using Flurl.Http.Testing;
 
 namespace AdventOfCode.Tests;
 
 public class PuzzleInputProviderTests : IDisposable
 {
+    private readonly HttpTest _httpTest = new();
+
+    private readonly string? _sessionAtStart;
+
     private readonly string[] _inputFilesAtStart
         = Directory.GetFiles(PuzzleInputProvider.InputFolder);
 
+    public PuzzleInputProviderTests()
+    {
+        _sessionAtStart = Environment.GetEnvironmentVariable(PuzzleInputProvider.SessionOptionName);
+        Environment.SetEnvironmentVariable(PuzzleInputProvider.SessionOptionName, "abcd1234");
+    }
+
     public void Dispose()
     {
+        _httpTest.Dispose();
+        Environment.SetEnvironmentVariable(PuzzleInputProvider.SessionOptionName, _sessionAtStart);
+
         var inputFilesAtEnd = Directory.GetFiles(PuzzleInputProvider.InputFolder);
         foreach (var inputFile in inputFilesAtEnd)
         {
@@ -19,7 +34,7 @@ public class PuzzleInputProviderTests : IDisposable
     }
 
     [Fact]
-    public void Finds_existing_puzzle_input()
+    public void Finds_existing_input()
     {
         var puzzleWithInput = new PuzzleMetadata(Day: 1);
         var expectedInput = """
@@ -37,11 +52,41 @@ public class PuzzleInputProviderTests : IDisposable
     }
 
     [Fact]
-    public void Throws_when_missing_puzzle_input()
+    public void Downloads_missing_input()
     {
         var puzzleWithoutInput = new PuzzleMetadata(Day: 2);
 
+        PuzzleInputProvider.GetInputForPuzzle(puzzleWithoutInput);
+        _httpTest.ShouldHaveMadeACall();
+    }
+
+    [Fact]
+    public void Fails_for_nonexistent_missing_input()
+    {
+        var puzzleWithoutInput = new PuzzleMetadata(Day: 2);
+        _httpTest.RespondWith(status: (int)HttpStatusCode.NotFound);
+
         var act = () => PuzzleInputProvider.GetInputForPuzzle(puzzleWithoutInput);
         act.Should().Throw<MissingInputException>();
+    }
+
+    [Fact]
+    public void Requires_session_when_missing_input()
+    {
+        var puzzleWithoutInput = new PuzzleMetadata(Day: 2);
+        Environment.SetEnvironmentVariable(PuzzleInputProvider.SessionOptionName, null);
+
+        var act = () => PuzzleInputProvider.GetInputForPuzzle(puzzleWithoutInput);
+        act.Should().Throw<MissingSessionException>();
+    }
+
+    [Fact]
+    public void Requires_valid_session_when_missing_input()
+    {
+        var puzzleWithoutInput = new PuzzleMetadata(Day: 2);
+        _httpTest.RespondWith(status: (int)HttpStatusCode.InternalServerError);
+
+        var act = () => PuzzleInputProvider.GetInputForPuzzle(puzzleWithoutInput);
+        act.Should().Throw<InvalidSessionException>();
     }
 }
