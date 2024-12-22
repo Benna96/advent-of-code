@@ -19,8 +19,6 @@ and send very few real requests while developing the structure.
 - *Not technically in guidelines...* but, all HTTP-related tests use a fake that
   doesn't actually connect online (see [Flurl's documentation](https://flurl.dev/docs/testable-http/)),
   preventing unnecessary traffic
-  - The fake is created in [HttpFixture](AdventOfCode.Tests/HttpFixture.cs),
-    which is used by all test classes testing functionality that may make HTTP requests
 
 ### Guidelines not yet necessarily followed
 - All network related things, **however**, network functionality has not yet been added
