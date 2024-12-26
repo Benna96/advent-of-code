@@ -7,7 +7,6 @@ namespace AdventOfCode;
 
 public class PuzzleInputProvider
 {
-    public static readonly string InputFolder = "Inputs";
     public static readonly string SessionOptionName = "AOC_SESSION";
 
     public static PuzzleInputProvider Instance { get; } = new();
@@ -27,16 +26,16 @@ public class PuzzleInputProvider
         _fileSystem = fileSystem;
     }
 
-    private static string GetPathForPuzzle(PuzzleMetadata puzzle, IFileSystem fileSystem)
+    public string GetPathForPuzzle(PuzzleMetadata puzzle)
     {
         var zeroPadded = $"{puzzle.Day:00}";
-        var path = fileSystem.Path.Join(InputFolder, $"{zeroPadded}.txt");
+        var path = _fileSystem.Path.Join("Inputs", $"{zeroPadded}.txt");
         return path;
     }
 
     public string GetInputForPuzzle(PuzzleMetadata puzzle)
     {
-        var path = GetPathForPuzzle(puzzle, _fileSystem);
+        var path = GetPathForPuzzle(puzzle);
         if (!_fileSystem.File.Exists(path))
         {
             DownloadPuzzleInputTo(puzzle, path);

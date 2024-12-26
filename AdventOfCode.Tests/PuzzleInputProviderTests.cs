@@ -25,8 +25,11 @@ public class PuzzleInputProviderTests : IDisposable
     [Fact]
     public void Finds_existing_input()
     {
+        var fileSystem = new MockFileSystem();
+        var inputProvider = new PuzzleInputProvider(fileSystem);
+
         var puzzleWithInput = new PuzzleMetadata(Day: 1);
-        var puzzlePath = MockUnixSupport.Path($"{PuzzleInputProvider.InputFolder}/01.txt");
+        var puzzlePath = inputProvider.GetPathForPuzzle(puzzleWithInput);
         var expectedInput = """
                             3   4
                             4   3
@@ -37,10 +40,7 @@ public class PuzzleInputProviderTests : IDisposable
 
                             """;
 
-        var fileSystem = new MockFileSystem();
         fileSystem.AddFile(puzzlePath, expectedInput);
-
-        var inputProvider = new PuzzleInputProvider(fileSystem);
 
         var input = inputProvider.GetInputForPuzzle(puzzleWithInput);
         input.Should().Be(expectedInput);
