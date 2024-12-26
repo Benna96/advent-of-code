@@ -1,34 +1,51 @@
 using Flurl;
 using Flurl.Http;
-using System.IO;
+using System.IO.Abstractions;
 using System.Net;
 
 namespace AdventOfCode;
 
-public static class PuzzleInputProvider
+public class PuzzleInputProvider
 {
     public static readonly string InputFolder = "Inputs";
     public static readonly string SessionOptionName = "AOC_SESSION";
 
-    private static string GetPathForPuzzle(PuzzleMetadata puzzle)
+    public static PuzzleInputProvider Instance { get; } = new();
+
+    private readonly IFileSystem _fileSystem;
+
+    private PuzzleInputProvider() : this(new FileSystem())
+    {
+    }
+
+    /// <summary>
+    /// Only tests should use this! Elsewhere, just use <see cref="Instance"/>.
+    /// </summary>
+    /// <param name="fileSystem"></param>
+    public PuzzleInputProvider(IFileSystem fileSystem)
+    {
+        _fileSystem = fileSystem;
+    }
+
+    private static string GetPathForPuzzle(PuzzleMetadata puzzle, IFileSystem fileSystem)
     {
         var zeroPadded = $"{puzzle.Day:00}";
-        var path = Path.Join(InputFolder, $"{zeroPadded}.txt");
+        var path = fileSystem.Path.Join(InputFolder, $"{zeroPadded}.txt");
         return path;
     }
 
-    public static string GetInputForPuzzle(PuzzleMetadata puzzle)
+    public string GetInputForPuzzle(PuzzleMetadata puzzle)
     {
-        var path = GetPathForPuzzle(puzzle);
-        if (!File.Exists(path))
+        var path = GetPathForPuzzle(puzzle, _fileSystem);
+        if (!_fileSystem.File.Exists(path))
         {
             DownloadPuzzleInputTo(puzzle, path);
         }
 
-        return File.ReadAllText(path);
+        return _fileSystem.File.ReadAllText(path);
     }
 
-    private static void DownloadPuzzleInputTo(PuzzleMetadata puzzle, string path)
+    private void DownloadPuzzleInputTo(PuzzleMetadata puzzle, string path)
     {
         var session = Environment.GetEnvironmentVariable(SessionOptionName);
         if (string.IsNullOrEmpty(session))
@@ -47,9 +64,7 @@ public static class PuzzleInputProvider
 
         try
         {
-            var folderPath = Path.GetDirectoryName(path);
-            var fileName = Path.GetFileName(path);
-            request.DownloadFileAsync(folderPath, fileName)
+            request.DownloadFileAsync(_fileSystem, path)
                 .GetAwaiter()
                 .GetResult();
         }
