@@ -6,12 +6,18 @@ namespace AdventOfCode.Tests;
 
 public class PuzzleInputProviderTests : IDisposable
 {
-    private readonly HttpTest _httpTest = new();
+    private readonly HttpTest _httpTest;
+    private readonly MockFileSystem _fileSystem;
+    private readonly PuzzleInputProvider _inputProvider;
 
     private readonly string? _sessionAtStart;
 
     public PuzzleInputProviderTests()
     {
+        _httpTest = new HttpTest();
+        _fileSystem = new MockFileSystem();
+        _inputProvider = new PuzzleInputProvider(_fileSystem);
+
         _sessionAtStart = Environment.GetEnvironmentVariable(PuzzleInputProvider.SessionOptionName);
         Environment.SetEnvironmentVariable(PuzzleInputProvider.SessionOptionName, "abcd1234");
     }
@@ -25,11 +31,8 @@ public class PuzzleInputProviderTests : IDisposable
     [Fact]
     public void Finds_existing_input()
     {
-        var fileSystem = new MockFileSystem();
-        var inputProvider = new PuzzleInputProvider(fileSystem);
-
         var puzzleWithInput = new PuzzleMetadata(Day: 1);
-        var puzzlePath = inputProvider.GetPathForPuzzle(puzzleWithInput);
+        var puzzlePath = _inputProvider.GetPathForPuzzle(puzzleWithInput);
         var expectedInput = """
                             3   4
                             4   3
@@ -40,9 +43,9 @@ public class PuzzleInputProviderTests : IDisposable
 
                             """;
 
-        fileSystem.AddFile(puzzlePath, expectedInput);
+        _fileSystem.AddFile(puzzlePath, expectedInput);
 
-        var input = inputProvider.GetInputForPuzzle(puzzleWithInput);
+        var input = _inputProvider.GetInputForPuzzle(puzzleWithInput);
         input.Should().Be(expectedInput);
     }
 
@@ -50,9 +53,8 @@ public class PuzzleInputProviderTests : IDisposable
     public void Downloads_missing_input()
     {
         var puzzleWithoutInput = new PuzzleMetadata(Day: 2);
-        var inputProvider = new PuzzleInputProvider(new MockFileSystem());
 
-        inputProvider.GetInputForPuzzle(puzzleWithoutInput);
+        _inputProvider.GetInputForPuzzle(puzzleWithoutInput);
         _httpTest.ShouldHaveMadeACall();
     }
 
@@ -60,10 +62,9 @@ public class PuzzleInputProviderTests : IDisposable
     public void Fails_for_nonexistent_missing_input()
     {
         var puzzleWithoutInput = new PuzzleMetadata(Day: 2);
-        var inputProvider = new PuzzleInputProvider(new MockFileSystem());
         _httpTest.RespondWith(status: (int)HttpStatusCode.NotFound);
 
-        var act = () => inputProvider.GetInputForPuzzle(puzzleWithoutInput);
+        var act = () => _inputProvider.GetInputForPuzzle(puzzleWithoutInput);
         act.Should().Throw<MissingInputException>();
     }
 
@@ -71,10 +72,9 @@ public class PuzzleInputProviderTests : IDisposable
     public void Requires_session_when_missing_input()
     {
         var puzzleWithoutInput = new PuzzleMetadata(Day: 2);
-        var inputProvider = new PuzzleInputProvider(new MockFileSystem());
         Environment.SetEnvironmentVariable(PuzzleInputProvider.SessionOptionName, null);
 
-        var act = () => inputProvider.GetInputForPuzzle(puzzleWithoutInput);
+        var act = () => _inputProvider.GetInputForPuzzle(puzzleWithoutInput);
         act.Should().Throw<MissingSessionException>();
     }
 
@@ -82,10 +82,9 @@ public class PuzzleInputProviderTests : IDisposable
     public void Requires_valid_session_when_missing_input()
     {
         var puzzleWithoutInput = new PuzzleMetadata(Day: 2);
-        var inputProvider = new PuzzleInputProvider(new MockFileSystem());
         _httpTest.RespondWith(status: (int)HttpStatusCode.InternalServerError);
 
-        var act = () => inputProvider.GetInputForPuzzle(puzzleWithoutInput);
+        var act = () => _inputProvider.GetInputForPuzzle(puzzleWithoutInput);
         act.Should().Throw<InvalidSessionException>();
     }
 }
