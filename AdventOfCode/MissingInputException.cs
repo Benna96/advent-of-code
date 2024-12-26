@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace AdventOfCode;
 
 public class MissingInputException : Exception
