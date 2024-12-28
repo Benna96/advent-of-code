@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- From Common.props, inlined to avoid needless complexity -->
+  <PropertyGroup>
+    <LangVersion>10</LangVersion>
+  </PropertyGroup>
+
+  <!-- From Common.Test.props, inlined to avoid needless complexity -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFrameworks>net462;netstandard2.0;net5.0;net6.0</TargetFrameworks>
+    <AssemblyTitle>TestTypeFoundation</AssemblyTitle>
+    <AssemblyName>TestTypeFoundation</AssemblyName>
+  </PropertyGroup>
+
+</Project>
+

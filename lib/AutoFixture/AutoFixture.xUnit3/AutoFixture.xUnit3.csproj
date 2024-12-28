@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- From Common.props, inlined to avoid needless complexity -->
+  <PropertyGroup>
+    <LangVersion>10</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;netstandard2.0;net6.0</TargetFrameworks>
+    <AssemblyTitle>AutoFixture.xUnit.net3</AssemblyTitle>
+    <AssemblyName>AutoFixture.Xunit3</AssemblyName>
+    <RootNamespace>AutoFixture.Xunit3</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.5" />
+    <PackageReference Include="AutoFixture" Version="5.0.0-preview0011" />
+    <PackageReference Include="xunit.v3.extensibility.core" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>
