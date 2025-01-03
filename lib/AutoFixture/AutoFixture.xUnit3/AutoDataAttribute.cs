@@ -61,7 +61,7 @@ namespace AutoFixture.Xunit3
             if (testMethod is null) throw new ArgumentNullException(nameof(testMethod));
 
             return new AutoTestCaseSource(this.FixtureFactory)
-                .GetTestCases(testMethod).Select(x => x.ToArray());
+                .GetTestCases(testMethod);
         }
 
         public override ValueTask<IReadOnlyCollection<ITheoryDataRow>> GetData(MethodInfo testMethod, DisposalTracker disposalTracker)

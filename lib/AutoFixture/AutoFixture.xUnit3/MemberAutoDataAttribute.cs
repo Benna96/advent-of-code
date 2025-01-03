@@ -102,10 +102,14 @@ namespace AutoFixture.Xunit3
             var sourceType = this.MemberType ?? testMethod.DeclaringType
                 ?? throw new InvalidOperationException("Source type cannot be null.");
 
-            return new AutoTestCaseSource(
-                    this.FixtureFactory,
-                    new MemberTestCaseSource(sourceType, this.MemberName, this.Parameters))
-                .GetTestCases(testMethod).Select(x => x.ToArray());
+            var source = new AutoTestCaseSource(
+                createFixture: this.FixtureFactory,
+                source: new MemberTestCaseSource(
+                    type: sourceType,
+                    name: this.MemberName,
+                    arguments: this.Parameters));
+
+            return source.GetTestCases(testMethod);
         }
 
         public override ValueTask<IReadOnlyCollection<ITheoryDataRow>> GetData(MethodInfo testMethod, DisposalTracker disposalTracker)

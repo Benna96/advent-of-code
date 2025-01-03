@@ -184,11 +184,9 @@ namespace AutoFixture.Xunit3.UnitTest
             var method = typeof(TypeWithCustomizationAttributes)
                 .GetMethod(methodName, new[] { typeof(ConcreteType) });
             var customizationLog = new List<ICustomization>();
-            var fixture = new DelegatingFixture();
-            fixture.OnCustomize = c =>
+            var fixture = new DelegatingFixture
             {
-                customizationLog.Add(c);
-                return fixture;
+                OnCustomize = c => customizationLog.Add(c)
             };
 
             var sut = new DerivedMemberAutoDataAttribute(
@@ -197,7 +195,7 @@ namespace AutoFixture.Xunit3.UnitTest
                 nameof(TestTypeWithMethodData.TestCasesWithNoValues));
 
             // Act
-            var data = sut.GetData(method).ToArray();
+            _ = sut.GetData(method).ToArray();
 
             // Assert
             var composite = Assert.IsAssignableFrom<CompositeCustomization>(customizationLog[0]);
@@ -413,6 +411,25 @@ namespace AutoFixture.Xunit3.UnitTest
                     Assert.Equal(94, testCase[1]);
                     Assert.Equal(52.21m, testCase[2]);
                 });
+        }
+
+        public static IEnumerable<object[]> TestDataWithNullValues
+        {
+            get
+            {
+                yield return new object[] { null, null };
+                yield return new object[] { string.Empty, null };
+                yield return new object[] { " ", null };
+            }
+        }
+
+        [Theory]
+        [MemberAutoData(nameof(TestDataWithNullValues))]
+        public void NullTestDataReturned(string a, string b, PropertyHolder<string> c)
+        {
+            Assert.True(string.IsNullOrWhiteSpace(a));
+            Assert.Null(b);
+            Assert.NotNull(c);
         }
     }
 }

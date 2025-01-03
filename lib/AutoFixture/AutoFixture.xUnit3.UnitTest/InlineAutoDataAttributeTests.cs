@@ -111,11 +111,9 @@ namespace AutoFixture.Xunit3.UnitTest
             var method = typeof(TypeWithCustomizationAttributes)
                 .GetMethod(methodName, new[] { typeof(ConcreteType) });
             var customizationLog = new List<ICustomization>();
-            var fixture = new DelegatingFixture();
-            fixture.OnCustomize = c =>
+            var fixture = new DelegatingFixture
             {
-                customizationLog.Add(c);
-                return fixture;
+                OnCustomize = c => customizationLog.Add(c)
             };
             var sut = new DerivedInlineAutoDataAttribute(() => fixture);
 

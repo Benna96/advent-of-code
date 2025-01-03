@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -89,26 +88,26 @@ namespace AutoFixture.Xunit3
         /// <summary>
         /// Gets the fixture factory that provides the missing data from <see cref="SourceType"/>.
         /// </summary>
-        public Func<IFixture> FixtureFactory { get; private set; }
+        public Func<IFixture> FixtureFactory { get; }
 
         /// <summary>
         /// Gets the type of the class that provides the data.
         /// </summary>
-        public Type SourceType { get; private set; }
+        public Type SourceType { get; }
 
         /// <summary>
         /// Gets the constructor parameters for <see cref="SourceType"/>.
         /// </summary>
-        public object[] Parameters { get; private set; }
+        public object[] Parameters { get; }
 
         /// <inheritdoc />
         public /*override*/ IEnumerable<object[]> GetData(MethodInfo testMethod)
         {
             var source = new AutoTestCaseSource(
-                    this.FixtureFactory,
-                    new ClassTestCaseSource(this.SourceType, this.Parameters));
+                this.FixtureFactory,
+                new ClassTestCaseSource(this.SourceType, this.Parameters));
 
-            return source.GetTestCases(testMethod).Select(x => x.ToArray());
+            return source.GetTestCases(testMethod);
         }
 
         public override ValueTask<IReadOnlyCollection<ITheoryDataRow>> GetData(MethodInfo testMethod, DisposalTracker disposalTracker)
