@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using AutoFixture.Xunit3.UnitTest.TestTypes;
 using TestTypeFoundation;
 using Xunit;
+using Xunit.Sdk;
 using Xunit.v3;
 
 namespace AutoFixture.Xunit3.UnitTest
@@ -88,51 +91,59 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void ThrowsWhenTestMethodNull()
+        public async ValueTask ThrowsWhenTestMethodNull()
         {
             // Arrange
+            var disposalTracker = new DisposalTracker();
             var sut = new MemberAutoDataAttribute("memberName");
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => sut.GetData(null!).ToArray());
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+                await sut.GetData(null!, disposalTracker));
         }
 
         [Fact]
-        public void ThrowsWhenMemberNotEnumerable()
+        public async ValueTask ThrowsWhenMemberNotEnumerable()
         {
             // Arrange
             var memberName = nameof(TestTypeWithMethodData.NonEnumerableMethod);
             var sut = new MemberAutoDataAttribute(memberName);
             var method = TestTypeWithMethodData.GetNonEnumerableMethodInfo();
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
-            var ex = Assert.Throws<ArgumentException>(() => sut.GetData(method).ToArray());
+            var ex = await Assert.ThrowsAsync<ArgumentException>(async () =>
+                await sut.GetData(method, disposalTracker));
             Assert.Contains(memberName, ex.Message);
         }
 
         [Fact]
-        public void ThrowsWhenMemberNotStatic()
+        public async ValueTask ThrowsWhenMemberNotStatic()
         {
             // Arrange
             var memberName = nameof(TestTypeWithMethodData.NonStaticSource);
             var sut = new MemberAutoDataAttribute(memberName);
             var method = TestTypeWithMethodData.GetNonStaticSourceMethodInfo();
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
-            var ex = Assert.Throws<ArgumentException>(() => sut.GetData(method).ToArray());
+            var ex = await Assert.ThrowsAsync<ArgumentException>(async () =>
+                await sut.GetData(method, disposalTracker));
             Assert.Contains(memberName, ex.Message);
         }
 
         [Fact]
-        public void ThrowsWhenMemberDoesNotExist()
+        public async ValueTask ThrowsWhenMemberDoesNotExist()
         {
             // Arrange
             var memberName = Guid.NewGuid().ToString();
             var sut = new MemberAutoDataAttribute(typeof(TestTypeWithMethodData), memberName);
             var method = TestTypeWithMethodData.GetMultipleValueTestMethodInfo();
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
-            var ex = Assert.Throws<ArgumentException>(() => sut.GetData(method).ToArray());
+            var ex = await Assert.ThrowsAsync<ArgumentException>(async () =>
+                await sut.GetData(method, disposalTracker));
             Assert.Contains(memberName, ex.Message);
         }
 
@@ -178,11 +189,12 @@ namespace AutoFixture.Xunit3.UnitTest
         [InlineData("CreateWithModestAndFrozen")]
         [InlineData("CreateWithFrozenAndNoAutoProperties")]
         [InlineData("CreateWithNoAutoPropertiesAndFrozen")]
-        public void GetDataOrdersCustomizationAttributes(string methodName)
+        public async ValueTask GetDataOrdersCustomizationAttributes(string methodName)
         {
             // Arrange
             var method = typeof(TypeWithCustomizationAttributes)
                 .GetMethod(methodName, new[] { typeof(ConcreteType) });
+            var disposalTracker = new DisposalTracker();
             var customizationLog = new List<ICustomization>();
             var fixture = new DelegatingFixture
             {
@@ -195,7 +207,7 @@ namespace AutoFixture.Xunit3.UnitTest
                 nameof(TestTypeWithMethodData.TestCasesWithNoValues));
 
             // Act
-            _ = sut.GetData(method).ToArray();
+            _ = await sut.GetData(method, disposalTracker);
 
             // Assert
             var composite = Assert.IsAssignableFrom<CompositeCustomization>(customizationLog[0]);
@@ -204,13 +216,15 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void GeneratesTestsFromParameterlessMethod()
+        public async ValueTask GeneratesTestsFromParameterlessMethod()
         {
             const string memberName = nameof(TestTypeWithMethodData.GetSingleStringValueTestCases);
             var sut = new MemberAutoDataAttribute(memberName);
             var testMethod = TestTypeWithMethodData.GetSingleStringValueTestMethodInfo();
+            var disposalTracker = new DisposalTracker();
 
-            var testCases = sut.GetData(testMethod).ToArray();
+            var testCases = (await sut.GetData(testMethod, disposalTracker))
+                .Select(row => row.GetData());
 
             Assert.Collection(testCases,
                 testCase => Assert.Equal("value-one", testCase.Single()),
@@ -219,13 +233,15 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void GeneratesTestsFromMethodWithParameter()
+        public async ValueTask GeneratesTestsFromMethodWithParameter()
         {
             const string memberName = nameof(TestTypeWithMethodData.GetStringTestsFromArgument);
             var sut = new MemberAutoDataAttribute(memberName, "testcase");
             var testMethod = TestTypeWithMethodData.GetStringTestsFromArgumentMethodInfo();
+            var disposalTracker = new DisposalTracker();
 
-            var testCases = sut.GetData(testMethod).ToArray();
+            var testCases = (await sut.GetData(testMethod, disposalTracker))
+                .Select(row => row.GetData());
 
             Assert.Collection(testCases,
                 testCase => Assert.Equal("testcase-one", testCase.Single()),
@@ -234,15 +250,17 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void GeneratesTestCasesForTestsWithMultipleParameters()
+        public async ValueTask GeneratesTestCasesForTestsWithMultipleParameters()
         {
             // Arrange
             const string memberName = nameof(TestTypeWithMethodData.GetMultipleValueTestCases);
             var sut = new MemberAutoDataAttribute(memberName);
             var testMethod = TestTypeWithMethodData.GetMultipleValueTestMethodInfo();
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var testCases = sut.GetData(testMethod).ToArray();
+            var testCases = (await sut.GetData(testMethod, disposalTracker))
+                .Select(row => row.GetData());
 
             // Assert
             Assert.Collection(testCases,
@@ -270,15 +288,17 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void GeneratesMissingDataForTestsWithMultipleParameters()
+        public async ValueTask GeneratesMissingDataForTestsWithMultipleParameters()
         {
             // Arrange
             const string memberName = nameof(TestTypeWithMethodData.GetSingleStringValueTestCases);
             var sut = new MemberAutoDataAttribute(memberName);
             var testMethod = TestTypeWithMethodData.GetMultipleValueTestMethodInfo();
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var testCases = sut.GetData(testMethod).ToArray();
+            var testCases = (await sut.GetData(testMethod, disposalTracker))
+                .Select(row => row.GetData());
 
             // Assert
             Assert.Collection(testCases,
@@ -306,15 +326,17 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void GeneratesTestCasesWithInjectedParameters()
+        public async ValueTask GeneratesTestCasesWithInjectedParameters()
         {
             // Arrange
             const string memberName = nameof(TestTypeWithMethodData.GetTestWithFrozenParameterCases);
             var sut = new MemberAutoDataAttribute(memberName);
             var testMethod = TestTypeWithMethodData.GetTestWithFrozenParameter();
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var testCases = sut.GetData(testMethod).ToArray();
+            var testCases = (await sut.GetData(testMethod, disposalTracker))
+                .Select(row => row.GetData());
 
             // Assert
             Assert.Collection(testCases,
@@ -342,15 +364,17 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void AutoGeneratesValuesForFrozenParameters()
+        public async ValueTask AutoGeneratesValuesForFrozenParameters()
         {
             // Arrange
             const string memberName = nameof(TestTypeWithMethodData.GetSingleStringValueTestCases);
             var sut = new MemberAutoDataAttribute(memberName);
             var testMethod = TestTypeWithMethodData.GetTestWithFrozenParameter();
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var testCases = sut.GetData(testMethod).ToArray();
+            var testCases = (await sut.GetData(testMethod, disposalTracker))
+                .Select(row => row.GetData());
 
             // Assert
             Assert.Collection(testCases,
@@ -378,15 +402,17 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void SupportsInheritedTestDataMembers()
+        public async ValueTask SupportsInheritedTestDataMembers()
         {
             // Arrange
             const string memberName = nameof(TestTypeWithMethodData.GetMultipleValueTestCases);
             var sut = new MemberAutoDataAttribute(memberName);
             var testMethod = ChildTestTypeMethodData.GetMultipleValueTestMethodInfo();
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var testCases = sut.GetData(testMethod).ToArray();
+            var testCases = (await sut.GetData(testMethod, disposalTracker))
+                .Select(row => row.GetData());
 
             // Assert
             Assert.Collection(testCases,

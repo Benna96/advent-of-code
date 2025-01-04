@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AutoFixture.Xunit3.Internal;
 using TestTypeFoundation;
 using Xunit;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.UnitTest.Internal
 {
@@ -79,10 +80,11 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
                 .GetMethod(nameof(this.GetTestDataFieldWithMixedValues));
             var testData = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithReferenceTypeParameter));
+            var disposalTracker = new DisposalTracker();
             var sut = new MethodTestCaseSource(testDataSource);
 
             // Act
-            var result = sut.GetTestCases(testData);
+            var result = sut.GetTestCases(testData, disposalTracker);
 
             // Assert
             Assert.Equal(expected, result);

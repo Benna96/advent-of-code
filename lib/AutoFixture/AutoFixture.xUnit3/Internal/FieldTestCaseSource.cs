@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.Internal
 {
@@ -33,11 +34,12 @@ namespace AutoFixture.Xunit3.Internal
         /// <summary>
         /// Gets the test data from the source field.
         /// </summary>
+        /// <param name="disposalTracker">The disposal tracker used to dispose the data.</param>
         /// <returns>Returns a sequence of argument collections.</returns>
         /// <exception cref="InvalidCastException">
         /// Thrown when the field does not return an enumerable value.
         /// </exception>
-        protected override IEnumerable<object[]> GetTestData()
+        protected override IEnumerable<object[]> GetTestData(DisposalTracker disposalTracker)
         {
             var value = this.FieldInfo.GetValue(null);
             if (value is not IEnumerable<object[]> enumerable)

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.Internal
 {
@@ -12,7 +13,8 @@ namespace AutoFixture.Xunit3.Internal
         /// Returns the test cases provided by the source.
         /// </summary>
         /// <param name="method">The target method for which to provide the arguments.</param>
+        /// <param name="disposalTracker">The disposal tracker used to dispose the data.</param>
         /// <returns>Returns a sequence of argument collections.</returns>
-        IEnumerable<object[]> GetTestCases(MethodInfo method);
+        IEnumerable<object[]> GetTestCases(MethodInfo method, DisposalTracker disposalTracker);
     }
 }

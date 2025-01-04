@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using AutoFixture.Xunit3.UnitTest.TestTypes;
 using TestTypeFoundation;
 using Xunit;
+using Xunit.Sdk;
 using Xunit.v3;
 
 namespace AutoFixture.Xunit3.UnitTest
@@ -21,13 +23,17 @@ namespace AutoFixture.Xunit3.UnitTest
 
         [Theory]
         [ClassData(typeof(CompositeDataAttributeSufficientDataTest))]
-        public void GetDataReturnsCorrectResult(IEnumerable<DataAttribute> attributes, IEnumerable<object[]> expectedResult)
+        public async ValueTask GetDataReturnsCorrectResult(IEnumerable<DataAttribute> attributes, IEnumerable<object[]> expectedResult)
         {
             // Arrange
+            var disposalTracker = new DisposalTracker();
+            var sut = new CompositeDataAttribute(attributes.ToArray());
             // Act
-            var result = new CompositeDataAttribute(attributes.ToArray()).GetData(this.method).ToList();
+            var result = await sut.GetData(this.method, disposalTracker);
             // Assert
-            Assert.True(expectedResult.SequenceEqual(result, new TheoryComparer()));
+            Assert.True(expectedResult.SequenceEqual(
+                result.Select(row => row.GetData()),
+                new TheoryComparer()));
         }
 
         public IEnumerator<object[]> GetEnumerator()

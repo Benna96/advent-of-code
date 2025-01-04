@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.Internal
 {
@@ -17,15 +18,18 @@ namespace AutoFixture.Xunit3.Internal
         /// <summary>
         /// Gets the test cases provided by the source.
         /// </summary>
+        /// <param name="disposalTracker">The disposal tracker used to dispose the data.</param>
         /// <returns>Returns a sequence of argument collections.</returns>
-        protected abstract IEnumerable<object[]> GetTestData();
+        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
+        protected abstract IEnumerable<object[]> GetTestData(DisposalTracker disposalTracker);
 
         /// <summary>
         /// Returns the test cases provided by the source.
         /// </summary>
         /// <param name="method">The target method for which to provide the arguments.</param>
+        /// <param name="disposalTracker">The disposal tracker used to dispose the data.</param>
         /// <returns>Returns a sequence of argument collections.</returns>
-        public IEnumerable<object[]> GetTestCases(MethodInfo method)
+        public IEnumerable<object[]> GetTestCases(MethodInfo method, DisposalTracker disposalTracker)
         {
             if (method is null) throw new ArgumentNullException(nameof(method));
 
@@ -41,7 +45,7 @@ namespace AutoFixture.Xunit3.Internal
                     yield break;
                 }
 
-                var enumerable = this.GetTestData()
+                var enumerable = this.GetTestData(disposalTracker)
                     ?? throw new InvalidOperationException("The source member yielded no test data.");
 
                 foreach (var testCase in enumerable)

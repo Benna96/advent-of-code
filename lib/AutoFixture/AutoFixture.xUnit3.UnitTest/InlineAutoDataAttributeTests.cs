@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using AutoFixture.Xunit3.UnitTest.TestTypes;
 using TestTypeFoundation;
 using Xunit;
@@ -105,11 +106,12 @@ namespace AutoFixture.Xunit3.UnitTest
         [InlineData("CreateWithModestAndFrozen")]
         [InlineData("CreateWithFrozenAndNoAutoProperties")]
         [InlineData("CreateWithNoAutoPropertiesAndFrozen")]
-        public void GetDataOrdersCustomizationAttributes(string methodName)
+        public async ValueTask GetDataOrdersCustomizationAttributes(string methodName)
         {
             // Arrange
             var method = typeof(TypeWithCustomizationAttributes)
                 .GetMethod(methodName, new[] { typeof(ConcreteType) });
+            var disposalTracker = new DisposalTracker();
             var customizationLog = new List<ICustomization>();
             var fixture = new DelegatingFixture
             {
@@ -118,7 +120,7 @@ namespace AutoFixture.Xunit3.UnitTest
             var sut = new DerivedInlineAutoDataAttribute(() => fixture);
 
             // Act
-            sut.GetData(method).ToArray();
+            await sut.GetData(method, disposalTracker);
 
             // Assert
             var composite = Assert.IsAssignableFrom<CompositeCustomization>(customizationLog[0]);
@@ -129,14 +131,14 @@ namespace AutoFixture.Xunit3.UnitTest
         [Theory]
         [ClassData(typeof(InlinePrimitiveValuesTestData))]
         [ClassData(typeof(InlineFrozenValuesTestData))]
-        public void ReturnsSingleTestDataWithExpectedValues(
+        public async ValueTask ReturnsSingleTestDataWithExpectedValues(
             DataAttribute attribute, MethodInfo testMethod, object[] expected)
         {
             // Arrange
             var disposalTracker = new DisposalTracker();
 
             // Act
-            var actual = attribute.GetData(testMethod, disposalTracker).GetAwaiter().GetResult();
+            var actual = await attribute.GetData(testMethod, disposalTracker);
 
             // Assert
             Assert.Single(actual);

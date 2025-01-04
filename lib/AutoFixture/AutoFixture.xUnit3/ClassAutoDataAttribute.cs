@@ -101,20 +101,20 @@ namespace AutoFixture.Xunit3
         public object[] Parameters { get; }
 
         /// <inheritdoc />
-        public /*override*/ IEnumerable<object[]> GetData(MethodInfo testMethod)
+        public override ValueTask<IReadOnlyCollection<ITheoryDataRow>> GetData(
+            MethodInfo testMethod,
+            DisposalTracker disposalTracker)
         {
             var source = new AutoTestCaseSource(
                 this.FixtureFactory,
                 new ClassTestCaseSource(this.SourceType, this.Parameters));
 
-            return source.GetTestCases(testMethod);
-        }
+            var result = source
+                .GetTestCases(testMethod, disposalTracker)
+                .Select(this.ConvertDataRow)
+                .ToArray();
 
-        public override ValueTask<IReadOnlyCollection<ITheoryDataRow>> GetData(MethodInfo testMethod, DisposalTracker disposalTracker)
-        {
-            return new ValueTask<IReadOnlyCollection<ITheoryDataRow>>(this.GetData(testMethod)
-                .Select(data => new TheoryDataRow(data))
-                .ToArray());
+            return new ValueTask<IReadOnlyCollection<ITheoryDataRow>>(result);
         }
 
         /// <summary>

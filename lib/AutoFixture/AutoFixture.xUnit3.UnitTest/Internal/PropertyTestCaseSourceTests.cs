@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using AutoFixture.Xunit3.Internal;
 using TestTypeFoundation;
 using Xunit;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.UnitTest.Internal
 {
@@ -60,10 +62,11 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sourceProperty = typeof(PropertyTestCaseSourceTests)
                 .GetProperty(nameof(TestDataPropertyWithMixedValues));
             var sut = new PropertyTestCaseSource(sourceProperty);
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
             Assert.Throws<ArgumentNullException>(
-                () => sut.GetTestCases(null!));
+                () => sut.GetTestCases(null!, disposalTracker));
         }
 
         [Fact]
@@ -75,10 +78,11 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new PropertyTestCaseSource(sourceProperty);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithReferenceTypeParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
             Assert.Throws<InvalidCastException>(
-                () => sut.GetTestCases(method).ToArray());
+                () => sut.GetTestCases(method, disposalTracker).ToArray());
         }
 
         [Fact]
@@ -96,9 +100,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new PropertyTestCaseSource(sourceProperty);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithRecordTypeParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var result = sut.GetTestCases(method).ToArray();
+            var result = sut.GetTestCases(method, disposalTracker).ToArray();
 
             // Assert
             Assert.Equal(expected, result);
@@ -126,9 +131,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new PropertyTestCaseSource(sourceProperty);
             var testMethod = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithRecordTypeParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var result = sut.GetTestCases(testMethod).ToArray();
+            var result = sut.GetTestCases(testMethod, disposalTracker).ToArray();
 
             // Assert
             Assert.Equal(expected, result);

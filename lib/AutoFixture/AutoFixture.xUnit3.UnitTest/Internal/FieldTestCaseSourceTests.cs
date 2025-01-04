@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using AutoFixture.Xunit3.Internal;
 using TestTypeFoundation;
 using Xunit;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.UnitTest.Internal
 {
@@ -59,9 +61,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sourceField = typeof(FieldTestCaseSourceTests)
                 .GetField(nameof(TestDataFieldWithMixedValues));
             var sut = new FieldTestCaseSource(sourceField);
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => sut.GetTestCases(null!));
+            Assert.Throws<ArgumentNullException>(() => sut.GetTestCases(null!, disposalTracker));
         }
 
         [Fact]
@@ -73,9 +76,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new FieldTestCaseSource(sourceField);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithReferenceTypeParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
-            Assert.Throws<InvalidCastException>(() => sut.GetTestCases(method).ToArray());
+            Assert.Throws<InvalidCastException>(() => sut.GetTestCases(method, disposalTracker).ToArray());
         }
 
         [Fact]
@@ -93,9 +97,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new FieldTestCaseSource(sourceField);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithRecordTypeParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var result = sut.GetTestCases(method).ToArray();
+            var result = sut.GetTestCases(method, disposalTracker).ToArray();
 
             // Assert
             Assert.Equal(expected, result);

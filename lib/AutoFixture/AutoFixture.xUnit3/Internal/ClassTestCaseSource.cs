@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.Internal
 {
@@ -36,7 +37,7 @@ namespace AutoFixture.Xunit3.Internal
         public IReadOnlyList<object> Parameters => Array.AsReadOnly(this.parameters);
 
         /// <inheritdoc />
-        protected override IEnumerable<object[]> GetTestData()
+        protected override IEnumerable<object[]> GetTestData(DisposalTracker disposalTracker)
         {
             var instance = Activator.CreateInstance(type: this.Type, args: this.parameters);
             if (instance is not IEnumerable<object[]> enumerable)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.Internal
 {
@@ -30,7 +31,7 @@ namespace AutoFixture.Xunit3.Internal
         public object[] Values { get; }
 
         /// <inheritdoc />
-        public IEnumerable<object[]> GetTestCases(MethodInfo method)
+        public IEnumerable<object[]> GetTestCases(MethodInfo method, DisposalTracker disposalTracker)
         {
             if (method is null) throw new ArgumentNullException(nameof(method));
 

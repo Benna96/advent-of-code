@@ -53,18 +53,18 @@ namespace AutoFixture.Xunit3
         public object[] Values { get; }
 
         /// <inheritdoc />
-        public /*override*/ IEnumerable<object[]> GetData(MethodInfo testMethod)
-        {
-            var source = new AutoTestCaseSource(this.FixtureFactory, new InlineTestCaseSource(this.Values));
-
-            return source.GetTestCases(testMethod);
-        }
-
         public override ValueTask<IReadOnlyCollection<ITheoryDataRow>> GetData(MethodInfo testMethod, DisposalTracker disposalTracker)
         {
-            return new ValueTask<IReadOnlyCollection<ITheoryDataRow>>(this.GetData(testMethod)
-                .Select(data => new TheoryDataRow(data))
-                .ToArray());
+            var source = new AutoTestCaseSource(
+                this.FixtureFactory,
+                new InlineTestCaseSource(this.Values));
+
+            var result = source
+                .GetTestCases(testMethod, disposalTracker)
+                .Select(this.ConvertDataRow)
+                .ToArray();
+
+            return new ValueTask<IReadOnlyCollection<ITheoryDataRow>>(result);
         }
 
         /// <summary>

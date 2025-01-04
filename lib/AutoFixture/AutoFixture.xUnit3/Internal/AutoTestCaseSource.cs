@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.Internal
 {
@@ -39,12 +40,13 @@ namespace AutoFixture.Xunit3.Internal
         /// Returns the combined test cases provided by the source and auto-generated values.
         /// </summary>
         /// <param name="method">The target method for which to provide the arguments.</param>
+        /// <param name="disposalTracker">The disposal tracker used to dispose the data.</param>
         /// <returns>Returns a sequence of argument collections.</returns>
-        public IEnumerable<object[]> GetTestCases(MethodInfo method)
+        public IEnumerable<object[]> GetTestCases(MethodInfo method, DisposalTracker disposalTracker)
         {
             return this.Source is null
                 ? this.GenerateValues(method)
-                : this.CombineValues(method, this.Source);
+                : this.CombineValues(method, this.Source, disposalTracker);
         }
 
         private IEnumerable<object[]> GenerateValues(MethodBase methodInfo)
@@ -54,11 +56,14 @@ namespace AutoFixture.Xunit3.Internal
             yield return Array.ConvertAll(parameters, parameter => GenerateAutoValue(parameter, fixture));
         }
 
-        private IEnumerable<object[]> CombineValues(MethodInfo methodInfo, ITestCaseSource source)
+        private IEnumerable<object[]> CombineValues(
+            MethodInfo methodInfo,
+            ITestCaseSource source,
+            DisposalTracker disposalTracker)
         {
             var parameters = Array.ConvertAll(methodInfo.GetParameters(), TestParameter.From);
 
-            foreach (object[] testCase in source.GetTestCases(methodInfo))
+            foreach (object[] testCase in source.GetTestCases(methodInfo, disposalTracker))
             {
                 var customizations = parameters.Take(testCase.Length)
                     .Zip(testCase, (parameter, value) => new Argument(parameter, value))

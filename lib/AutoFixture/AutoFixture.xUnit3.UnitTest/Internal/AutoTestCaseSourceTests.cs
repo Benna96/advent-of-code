@@ -5,6 +5,7 @@ using AutoFixture.Kernel;
 using AutoFixture.Xunit3.Internal;
 using AutoFixture.Xunit3.UnitTest.TestTypes;
 using Xunit;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.UnitTest.Internal
 {
@@ -50,9 +51,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new AutoTestCaseSource(() => fixture);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithMultipleParameters));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var result = sut.GetTestCases(method!).ToArray();
+            var result = sut.GetTestCases(method!, disposalTracker).ToArray();
 
             // Assert
             Assert.NotNull(result);
@@ -85,9 +87,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new AutoTestCaseSource(() => fixture, source);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithMultipleParameters));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var result = sut.GetTestCases(method!).ToArray();
+            var result = sut.GetTestCases(method!, disposalTracker).ToArray();
 
             // Assert
             Assert.NotNull(result);
@@ -117,9 +120,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new AutoTestCaseSource(() => fixture, source);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithMultipleParameters));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var result = sut.GetTestCases(method!).ToArray();
+            var result = sut.GetTestCases(method!, disposalTracker).ToArray();
 
             // Assert
             Assert.NotNull(result);
@@ -141,9 +145,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new AutoTestCaseSource(() => fixture, source);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithMultipleParameters));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var result = sut.GetTestCases(method!).ToArray();
+            var result = sut.GetTestCases(method!, disposalTracker).ToArray();
 
             // Assert
             Assert.Empty(result);
@@ -161,9 +166,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new AutoTestCaseSource(() => fixture, source);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithMultipleParameters));
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => sut.GetTestCases(method!).ToArray());
+            Assert.Throws<InvalidOperationException>(() => sut.GetTestCases(method!, disposalTracker).ToArray());
         }
 
         [Fact]
@@ -178,9 +184,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new AutoTestCaseSource(() => fixture);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithMultipleParameters));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            _ = sut.GetTestCases(method!).ToArray();
+            _ = sut.GetTestCases(method!, disposalTracker).ToArray();
 
             // Assert
             Assert.Empty(customizations);
@@ -198,9 +205,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new AutoTestCaseSource(() => fixture);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithCustomizedParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            _ = sut.GetTestCases(method!).ToArray();
+            _ = sut.GetTestCases(method!, disposalTracker).ToArray();
 
             // Assert
             Assert.NotEmpty(customizations);
@@ -218,9 +226,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new AutoTestCaseSource(() => fixture);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithMultipleCustomizations));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            _ = sut.GetTestCases(method!).ToArray();
+            _ = sut.GetTestCases(method!, disposalTracker).ToArray();
 
             // Assert
             Assert.Collection(customizations,

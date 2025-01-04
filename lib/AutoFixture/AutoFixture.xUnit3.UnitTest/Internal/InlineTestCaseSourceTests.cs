@@ -1,6 +1,8 @@
 using System;
+using System.Reflection;
 using AutoFixture.Xunit3.Internal;
 using Xunit;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.UnitTest.Internal;
 
@@ -42,9 +44,10 @@ public class InlineTestCaseSourceTests
     {
         // Arrange
         var sut = new InlineTestCaseSource(Array.Empty<object>());
+        var disposalTracker = new DisposalTracker();
         // Act & Assert
         Assert.Throws<ArgumentNullException>(() =>
-            sut.GetTestCases(null));
+            sut.GetTestCases(null, disposalTracker));
     }
 
     [Fact]
@@ -55,10 +58,11 @@ public class InlineTestCaseSourceTests
         var sut = new InlineTestCaseSource(values);
         var testMethod = typeof(SampleTestType)
             .GetMethod(nameof(SampleTestType.TestMethodWithMultipleParameters));
+        var disposalTracker = new DisposalTracker();
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() =>
-            sut.GetTestCases(testMethod));
+            sut.GetTestCases(testMethod, disposalTracker));
     }
 
     [Fact]
@@ -69,9 +73,10 @@ public class InlineTestCaseSourceTests
         var sut = new InlineTestCaseSource(values);
         var testMethod = typeof(SampleTestType)
             .GetMethod(nameof(SampleTestType.TestMethodWithMultipleParameters));
+        var disposalTracker = new DisposalTracker();
 
         // Act
-        var result = sut.GetTestCases(testMethod);
+        var result = sut.GetTestCases(testMethod, disposalTracker);
 
         // Assert
         var testCase = Assert.Single(result);
@@ -86,9 +91,10 @@ public class InlineTestCaseSourceTests
         var sut = new InlineTestCaseSource(values);
         var testMethod = typeof(SampleTestType)
             .GetMethod(nameof(SampleTestType.TestMethodWithMultipleParameters));
+        var disposalTracker = new DisposalTracker();
 
         // Act
-        var result = sut.GetTestCases(testMethod);
+        var result = sut.GetTestCases(testMethod, disposalTracker);
 
         // Assert
         var testCase = Assert.Single(result);

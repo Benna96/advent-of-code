@@ -5,6 +5,7 @@ using System.Linq;
 using AutoFixture.Xunit3.Internal;
 using TestTypeFoundation;
 using Xunit;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.UnitTest.Internal
 {
@@ -71,9 +72,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new ClassTestCaseSource(typeof(object), Array.Empty<object>());
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithReferenceTypeParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => sut.GetTestCases(method).ToArray());
+            Assert.Throws<InvalidOperationException>(() => sut.GetTestCases(method, disposalTracker).ToArray());
         }
 
         [Fact]
@@ -89,9 +91,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new ClassTestCaseSource(typeof(TestSourceWithMixedValues), Array.Empty<object>());
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithReferenceTypeParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var actual = sut.GetTestCases(method).ToArray();
+            var actual = sut.GetTestCases(method, disposalTracker).ToArray();
 
             // Assert
             Assert.Equal(expected, actual);
@@ -117,9 +120,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new ClassTestCaseSource(typeof(TestSourceWithMixedValues), parameters);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithReferenceTypeParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
-            Assert.Throws<MissingMethodException>(() => sut.GetTestCases(method).ToArray());
+            Assert.Throws<MissingMethodException>(() => sut.GetTestCases(method, disposalTracker).ToArray());
         }
 
         [Fact]
@@ -130,9 +134,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new ClassTestCaseSource(typeof(DelegatingTestData), parameters);
             var method = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithReferenceTypeParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var result = sut.GetTestCases(method).ToArray();
+            var result = sut.GetTestCases(method, disposalTracker).ToArray();
 
             // Assert
             Assert.Equal(new object[] { "y", 25 }, result.Single());

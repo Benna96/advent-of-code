@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.Internal
 {
@@ -34,7 +35,7 @@ namespace AutoFixture.Xunit3.Internal
         public object[] Arguments { get; }
 
         /// <inheritdoc />
-        protected override IEnumerable<object[]> GetTestData()
+        protected override IEnumerable<object[]> GetTestData(DisposalTracker disposalTracker)
         {
             var value = this.MethodInfo.Invoke(null, this.Arguments);
             if (value is not IEnumerable<object[]> enumerable)

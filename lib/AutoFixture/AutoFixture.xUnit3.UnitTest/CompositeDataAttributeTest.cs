@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using AutoFixture.Xunit3.UnitTest.TestTypes;
 using Xunit;
+using Xunit.Sdk;
 using Xunit.v3;
 
 namespace AutoFixture.Xunit3.UnitTest
@@ -81,21 +83,23 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void GetDataWithNullMethodThrows()
+        public async ValueTask GetDataWithNullMethodThrows()
         {
             // Arrange
+            var disposalTracker = new DisposalTracker();
             var sut = new CompositeDataAttribute();
             // Act & assert
-            Assert.Throws<ArgumentNullException>(() =>
-                sut.GetData(null).ToList());
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+                _ = await sut.GetData(null, disposalTracker));
         }
 
         [Fact]
-        public void GetDataOnMethodWithNoParametersReturnsNoTheory()
+        public async ValueTask GetDataOnMethodWithNoParametersReturnsNoTheory()
         {
             // Arrange
             Action a = () => { };
             var method = a.GetMethodInfo();
+            var disposalTracker = new DisposalTracker();
 
             var sut = new CompositeDataAttribute(
                new FakeDataAttribute(method, Enumerable.Empty<object[]>()),
@@ -103,8 +107,8 @@ namespace AutoFixture.Xunit3.UnitTest
                new FakeDataAttribute(method, Enumerable.Empty<object[]>()));
 
             // Act & assert
-            var result = sut.GetData(a.GetMethodInfo());
-            result.ToList().ForEach(Assert.Empty);
+            var result = await sut.GetData(a.GetMethodInfo(), disposalTracker);
+            Assert.All(result, row => Assert.Empty(row.GetData()));
         }
     }
 }

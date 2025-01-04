@@ -49,26 +49,26 @@ namespace AutoFixture.Xunit3
         /// DataAttribute returned data.
         /// </summary>
         /// <param name="testMethod">The method that is being tested.</param>
-        /// <returns> Returns the composition of the theory data.</returns>
+        /// <param name="disposalTracker">The disposal tracker used to dispose the data.</param>
+        /// <returns>The composition of the theory data.</returns>
         /// <remarks>
         /// The number of combined data sets is restricted to the length of the attribute
         /// which provides the fewest data sets.
         /// </remarks>
-        public /*override*/ IEnumerable<object[]> GetData(MethodInfo testMethod)
+        public override async ValueTask<IReadOnlyCollection<ITheoryDataRow>> GetData(
+            MethodInfo testMethod,
+            DisposalTracker disposalTracker)
         {
             if (testMethod is null) throw new ArgumentNullException(nameof(testMethod));
 
-            return this.Attributes
-                .Select(attr => attr.GetData(testMethod, null).GetAwaiter().GetResult())
-                .Select(rows => rows.Select(row => row.GetData()))
-                .Zip(dataSets => dataSets.Collapse().ToArray());
-        }
+            var dataRowsOfEachAttribute = await Task.WhenAll(this.Attributes
+                .Select(attr => attr.GetData(testMethod, disposalTracker).AsTask()));
 
-        public override ValueTask<IReadOnlyCollection<ITheoryDataRow>> GetData(MethodInfo testMethod, DisposalTracker disposalTracker)
-        {
-            return new ValueTask<IReadOnlyCollection<ITheoryDataRow>>(this.GetData(testMethod)
-                .Select(data => new TheoryDataRow(data))
-                .ToArray());
+            return dataRowsOfEachAttribute
+                .Select(rows => rows.Select(row => row.GetData()))
+                .Zip(dataSetsAtIndex => dataSetsAtIndex.Collapse().ToArray())
+                .Select(this.ConvertDataRow)
+                .ToArray();
         }
 
         public override bool SupportsDiscoveryEnumeration()

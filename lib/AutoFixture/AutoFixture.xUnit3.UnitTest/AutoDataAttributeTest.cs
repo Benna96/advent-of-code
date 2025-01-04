@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using AutoFixture.Kernel;
 using AutoFixture.Xunit3.UnitTest.TestTypes;
 using TestTypeFoundation;
 using Xunit;
+using Xunit.Sdk;
 using Xunit.v3;
 
 namespace AutoFixture.Xunit3.UnitTest
@@ -65,6 +68,7 @@ namespace AutoFixture.Xunit3.UnitTest
         {
             // Arrange
             var wasInvoked = false;
+
             IFixture FixtureFactory()
             {
                 wasInvoked = true;
@@ -79,21 +83,24 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void GetDataWithNullMethodThrows()
+        public async ValueTask GetDataWithNullMethodThrows()
         {
             // Arrange
+            var disposalTracker = new DisposalTracker();
             var sut = new AutoDataAttribute();
 
             // Act & assert
-            Assert.Throws<ArgumentNullException>(() => sut.GetData(null).ToArray());
+            await Assert.ThrowsAsync<ArgumentNullException>(async () =>
+                _ = await sut.GetData(null, disposalTracker));
         }
 
         [Fact]
-        public void GetDataReturnsCorrectResult()
+        public async ValueTask GetDataReturnsCorrectResult()
         {
             // Arrange
             var method = typeof(TypeWithOverloadedMembers)
                 .GetMethod("DoSomething", new[] { typeof(object) });
+            var disposalTracker = new DisposalTracker();
             var parameters = method!.GetParameters();
             var expectedResult = new object();
 
@@ -112,13 +119,13 @@ namespace AutoFixture.Xunit3.UnitTest
             var sut = new DerivedAutoDataAttribute(() => composer);
 
             // Act
-            var result = sut.GetData(method).ToArray();
+            var result = await sut.GetData(method, disposalTracker);
 
             // Assert
             Assert.NotNull(actualContext);
             Assert.Single(parameters);
             Assert.Equal(parameters[0], actualParameter);
-            Assert.Equal(new[] { expectedResult }, result.Single());
+            Assert.Equal(new[] { expectedResult }, result.Single().GetData());
         }
 
         [Theory]
@@ -134,11 +141,12 @@ namespace AutoFixture.Xunit3.UnitTest
         [InlineData("CreateWithModestAndFrozen")]
         [InlineData("CreateWithFrozenAndNoAutoProperties")]
         [InlineData("CreateWithNoAutoPropertiesAndFrozen")]
-        public void GetDataOrdersCustomizationAttributes(string methodName)
+        public async ValueTask GetDataOrdersCustomizationAttributes(string methodName)
         {
             // Arrange
             var method = typeof(TypeWithCustomizationAttributes)
                 .GetMethod(methodName, new[] { typeof(ConcreteType) });
+            var disposalTracker = new DisposalTracker();
             var customizationLog = new List<ICustomization>();
             var fixture = new DelegatingFixture
             {
@@ -147,7 +155,7 @@ namespace AutoFixture.Xunit3.UnitTest
             var sut = new DerivedAutoDataAttribute(() => fixture);
 
             // Act
-            _ = sut.GetData(method).ToArray();
+            _ = await sut.GetData(method, disposalTracker);
 
             // Assert
             var composite = Assert.IsAssignableFrom<CompositeCustomization>(customizationLog[0]);
@@ -156,11 +164,12 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void ShouldRecognizeAttributesImplementingIParameterCustomizationSource()
+        public async ValueTask ShouldRecognizeAttributesImplementingIParameterCustomizationSource()
         {
             // Arrange
             var method = typeof(TypeWithIParameterCustomizationSourceUsage)
                 .GetMethod(nameof(TypeWithIParameterCustomizationSourceUsage.DecoratedMethod));
+            var disposalTracker = new DisposalTracker();
 
             var customizationLog = new List<ICustomization>();
             var fixture = new DelegatingFixture
@@ -170,7 +179,7 @@ namespace AutoFixture.Xunit3.UnitTest
             var sut = new DerivedAutoDataAttribute(() => fixture);
 
             // Act
-            _ = sut.GetData(method).ToArray();
+            _ = await sut.GetData(method, disposalTracker);
 
             // Assert
             Assert.IsType<TypeWithIParameterCustomizationSourceUsage.Customization>(customizationLog[0]);

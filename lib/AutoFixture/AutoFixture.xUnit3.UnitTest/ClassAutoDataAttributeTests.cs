@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoFixture.Kernel;
 using AutoFixture.Xunit3.UnitTest.TestTypes;
 using TestTypeFoundation;
 using Xunit;
+using Xunit.Sdk;
 using Xunit.v3;
 
 namespace AutoFixture.Xunit3.UnitTest
@@ -47,112 +49,127 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void GetDataThrowsWhenSourceTypeNotEnumerable()
+        public async ValueTask GetDataThrowsWhenSourceTypeNotEnumerable()
         {
             var sut = new ClassAutoDataAttribute(typeof(MyClass));
             var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var disposalTracker = new DisposalTracker();
 
-            Action act = () => _ = sut.GetData(testMethod).ToArray();
+            Func<Task> act = async () =>
+                _ = await sut.GetData(testMethod, disposalTracker);
 
-            Assert.Throws<InvalidOperationException>(act);
+            await Assert.ThrowsAsync<InvalidOperationException>(act);
         }
 
         [Fact]
-        public void GetDataThrowsWhenParametersDoNotMatchConstructor()
+        public async ValueTask GetDataThrowsWhenParametersDoNotMatchConstructor()
         {
             var sut = new ClassAutoDataAttribute(typeof(MyClass), "myString", 33, null);
             var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var disposalTracker = new DisposalTracker();
 
-            Action act = () => _ = sut.GetData(testMethod).ToArray();
+            Func<Task> act = async () =>
+                _ = await sut.GetData(testMethod, disposalTracker);
 
-            Assert.Throws<MissingMethodException>(act);
+            await Assert.ThrowsAsync<MissingMethodException>(act);
         }
 
         [Fact]
-        public void GetDataDoesNotThrowWhenSourceYieldsNoResults()
+        public async ValueTask GetDataDoesNotThrowWhenSourceYieldsNoResults()
         {
             var sut = new ClassAutoDataAttribute(typeof(EmptyClassData));
-            var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod))!;
+            var disposalTracker = new DisposalTracker();
 
-            var data = sut.GetData(testMethod).ToArray();
+            var data = await sut.GetData(testMethod, disposalTracker);
 
             Assert.Empty(data);
         }
 
         [Fact]
-        public void GetDataThrowsWhenSourceYieldsNullResults()
+        public async ValueTask GetDataThrowsWhenSourceYieldsNullResults()
         {
             // Arrange
             var sut = new ClassAutoDataAttribute(typeof(ClassWithNullTestCases));
             var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var disposalTracker = new DisposalTracker();
 
             // Act & assert
-            Assert.Throws<InvalidOperationException>(() => sut.GetData(testMethod).ToArray());
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await sut.GetData(testMethod, disposalTracker));
         }
 
         [Fact]
-        public void GetDataDoesNotThrow()
+        public async ValueTask GetDataDoesNotThrow()
         {
             var sut = new ClassAutoDataAttribute(typeof(MixedTypeClassData));
             var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var disposalTracker = new DisposalTracker();
 
-            _ = sut.GetData(testMethod);
+            _ = await sut.GetData(testMethod, disposalTracker);
         }
 
         [Fact]
-        public void GetDataReturnsEnumerable()
+        public async ValueTask GetDataReturnsEnumerable()
         {
             var sut = new ClassAutoDataAttribute(typeof(MixedTypeClassData));
             var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var disposalTracker = new DisposalTracker();
 
-            var actual = sut.GetData(testMethod);
+            var actual = await sut.GetData(testMethod, disposalTracker);
 
             Assert.NotNull(actual);
         }
 
         [Fact]
-        public void GetDataReturnsNonEmptyEnumerable()
+        public async ValueTask GetDataReturnsNonEmptyEnumerable()
         {
             var sut = new ClassAutoDataAttribute(typeof(MixedTypeClassData));
             var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var disposalTracker = new DisposalTracker();
 
-            var actual = sut.GetData(testMethod);
+            var actual = await sut.GetData(testMethod, disposalTracker);
 
             Assert.NotEmpty(actual);
         }
 
         [Fact]
-        public void GetDataReturnsExpectedTestCaseCount()
+        public async ValueTask GetDataReturnsExpectedTestCaseCount()
         {
             var sut = new ClassAutoDataAttribute(typeof(MixedTypeClassData));
             var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var disposalTracker = new DisposalTracker();
 
-            var actual = sut.GetData(testMethod);
+            var actual = await sut.GetData(testMethod, disposalTracker);
 
             Assert.Equal(5, actual.Count());
         }
 
         [Fact]
-        public void GetDataThrowsWhenDataSourceNotEnumerable()
+        public async ValueTask GetDataThrowsWhenDataSourceNotEnumerable()
         {
             var sut = new ClassAutoDataAttribute(typeof(GuardedConstructorHost<object>));
             var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var disposalTracker = new DisposalTracker();
 
-            Action act = () => _ = sut.GetData(testMethod).ToArray();
+            Func<Task> act = async () =>
+                _ = await sut.GetData(testMethod, disposalTracker);
 
-            Assert.Throws<MissingMethodException>(act);
+            await Assert.ThrowsAsync<MissingMethodException>(act);
         }
 
         [Fact]
-        public void GetDataThrowsForNonMatchingConstructorTypes()
+        public async ValueTask GetDataThrowsForNonMatchingConstructorTypes()
         {
             var sut = new ClassAutoDataAttribute(
                 typeof(DelegatingTestData), "myString", 33, null);
             var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var disposalTracker = new DisposalTracker();
 
-            Action act = () => _ = sut.GetData(testMethod).ToArray();
+            Func<Task> act = async () =>
+                _ = await sut.GetData(testMethod, disposalTracker);
 
-            Assert.Throws<MissingMethodException>(act);
+            await Assert.ThrowsAsync<MissingMethodException>(act);
         }
 
         [Theory]
@@ -168,11 +185,12 @@ namespace AutoFixture.Xunit3.UnitTest
         [InlineData("CreateWithModestAndFrozen")]
         [InlineData("CreateWithFrozenAndNoAutoProperties")]
         [InlineData("CreateWithNoAutoPropertiesAndFrozen")]
-        public void GetDataOrdersCustomizationAttributes(string methodName)
+        public async ValueTask GetDataOrdersCustomizationAttributes(string methodName)
         {
             // Arrange
             var method = typeof(TypeWithCustomizationAttributes)
                 .GetMethod(methodName, new[] { typeof(ConcreteType) });
+            var disposalTracker = new DisposalTracker();
             var customizationLog = new List<ICustomization>();
             var fixture = new DelegatingFixture
             {
@@ -182,7 +200,7 @@ namespace AutoFixture.Xunit3.UnitTest
             var sut = new DerivedClassAutoDataAttribute(() => fixture, typeof(ClassWithEmptyTestCases));
 
             // Act
-            _ = sut.GetData(method).ToArray();
+            _ = await sut.GetData(method, disposalTracker);
 
             // Assert
             var composite = Assert.IsAssignableFrom<CompositeCustomization>(customizationLog[0]);
@@ -191,7 +209,7 @@ namespace AutoFixture.Xunit3.UnitTest
         }
 
         [Fact]
-        public void GetDataReturnsExpectedTestCases()
+        public async ValueTask GetDataReturnsExpectedTestCases()
         {
             var builder = new CompositeSpecimenBuilder(
                 new FixedParameterBuilder<int>("a", 1),
@@ -202,6 +220,7 @@ namespace AutoFixture.Xunit3.UnitTest
                 () => new DelegatingFixture { OnCreate = (r, c) => builder.Create(r, c) },
                 typeof(MixedTypeClassData));
             var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var disposalTracker = new DisposalTracker();
             object[][] expected =
             {
                 new object[] { 1, "value", EnumType.First, new Tuple<string, int>("value", 1) },
@@ -211,13 +230,13 @@ namespace AutoFixture.Xunit3.UnitTest
                 new object[] { -95, "test-92", EnumType.Second, new Tuple<string, int>("myValue", 5) }
             };
 
-            var actual = sut.GetData(testMethod).ToArray();
+            var actual = await sut.GetData(testMethod, disposalTracker);
 
-            Assert.Equal(expected, actual);
+            Assert.Equal(expected, actual.Select(row => row.GetData()));
         }
 
         [Fact]
-        public void GetDataReturnsExpectedTestCasesFromParameterizedSource()
+        public async ValueTask GetDataReturnsExpectedTestCasesFromParameterizedSource()
         {
             var builder = new CompositeSpecimenBuilder(
                 new FixedParameterBuilder<int>("a", 1),
@@ -228,15 +247,16 @@ namespace AutoFixture.Xunit3.UnitTest
                 typeof(ParameterizedClassData),
                 29, "myValue", EnumType.Third);
             var testMethod = typeof(ExampleTestClass).GetMethod(nameof(ExampleTestClass.TestMethod));
+            var disposalTracker = new DisposalTracker();
             object[][] expected =
             {
                 new object[] { 29, "myValue", EnumType.Third, new Tuple<string, int>("value", 1) },
                 new object[] { 29, "myValue", EnumType.Third, new Tuple<string, int>("value", 1) }
             };
 
-            var actual = sut.GetData(testMethod).ToArray();
+            var actual = await sut.GetData(testMethod, disposalTracker);
 
-            Assert.Equal(expected, actual);
+            Assert.Equal(expected, actual.Select(row => row.GetData()));
         }
     }
 }

@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using AutoFixture.Xunit3.Internal;
 using Xunit;
+using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.UnitTest.Internal
 {
@@ -21,10 +23,12 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
         public void ThrowsWhenInvokedWithNullMethodInfo()
         {
             // Arrange
+            var disposalTracker = new DisposalTracker();
             var sut = new DelegatingTestCaseSource();
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => sut.GetTestCases(null));
+            Assert.Throws<ArgumentNullException>(() =>
+                sut.GetTestCases(null, disposalTracker));
         }
 
         [Fact]
@@ -34,9 +38,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new DelegatingTestCaseSource();
             var testMethod = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithoutParameters));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var result = sut.GetTestCases(testMethod).ToArray();
+            var result = sut.GetTestCases(testMethod, disposalTracker).ToArray();
 
             // Assert
             var item = Assert.Single(result);
@@ -50,9 +55,11 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new DelegatingTestCaseSource { TestCases = null };
             var testMethod = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithSingleParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => sut.GetTestCases(testMethod).ToArray());
+            Assert.Throws<InvalidOperationException>(() =>
+                sut.GetTestCases(testMethod, disposalTracker).ToArray());
         }
 
         [Fact]
@@ -65,9 +72,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             };
             var testMethod = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithSingleParameter));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var result = sut.GetTestCases(testMethod).ToArray();
+            var result = sut.GetTestCases(testMethod, disposalTracker).ToArray();
 
             // Assert
             var testCase = Assert.Single(result);
@@ -90,9 +98,10 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new DelegatingTestCaseSource { TestCases = testCases };
             var testMethod = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithMultipleParameters));
+            var disposalTracker = new DisposalTracker();
 
             // Act
-            var actual = sut.GetTestCases(testMethod).ToArray();
+            var actual = sut.GetTestCases(testMethod, disposalTracker).ToArray();
 
             // Assert
             Assert.Equal(testCases.Length, actual.Length);
@@ -110,9 +119,11 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
             var sut = new DelegatingTestCaseSource { TestCases = testCases };
             var testMethod = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithMultipleParameters));
+            var disposalTracker = new DisposalTracker();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => sut.GetTestCases(testMethod).ToArray());
+            Assert.Throws<InvalidOperationException>(() =>
+                sut.GetTestCases(testMethod, disposalTracker).ToArray());
         }
     }
 }
