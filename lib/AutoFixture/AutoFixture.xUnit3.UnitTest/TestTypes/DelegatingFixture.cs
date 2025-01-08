@@ -7,53 +7,37 @@ namespace AutoFixture.Xunit3.UnitTest.TestTypes
 {
     internal class DelegatingFixture : IFixture
     {
-        private readonly List<ISpecimenBuilder> customizations;
-        private readonly List<ISpecimenBuilder> residueCollectors;
+        private readonly List<ISpecimenBuilder> customizations = new();
+        private readonly List<ISpecimenBuilder> residueCollectors = new();
 
-        public DelegatingFixture()
-        {
-            this.customizations = new List<ISpecimenBuilder>();
-            this.residueCollectors = new List<ISpecimenBuilder>();
-            this.OnCreate = (r, s) => new object();
-        }
+        public IList<ISpecimenBuilderTransformation> Behaviors => throw new InvalidOperationException();
 
-        public IList<ISpecimenBuilderTransformation> Behaviors
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public IList<ISpecimenBuilder> Customizations
-        {
-            get { return this.customizations; }
-        }
+        public IList<ISpecimenBuilder> Customizations => this.customizations;
 
         public bool OmitAutoProperties { get; set; }
 
         public int RepeatCount { get; set; }
 
-        public IList<ISpecimenBuilder> ResidueCollectors
-        {
-            get { return this.residueCollectors; }
-        }
+        public IList<ISpecimenBuilder> ResidueCollectors => this.residueCollectors;
 
         public void AddManyTo<T>(ICollection<T> collection, Func<T> creator)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         public void AddManyTo<T>(ICollection<T> collection)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         public void AddManyTo<T>(ICollection<T> collection, int repeatCount)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         public ICustomizationComposer<T> Build<T>()
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         public IFixture Customize(ICustomization customization)
@@ -64,37 +48,37 @@ namespace AutoFixture.Xunit3.UnitTest.TestTypes
 
         public void Customize<T>(Func<ICustomizationComposer<T>, ISpecimenBuilder> composerTransformation)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         public void Inject<T>(T item)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         public void Register<T>(Func<T> creator)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         public void Register<TInput, T>(Func<TInput, T> creator)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         public void Register<TInput1, TInput2, T>(Func<TInput1, TInput2, T> creator)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         public void Register<TInput1, TInput2, TInput3, T>(Func<TInput1, TInput2, TInput3, T> creator)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         public void Register<TInput1, TInput2, TInput3, TInput4, T>(Func<TInput1, TInput2, TInput3, TInput4, T> creator)
         {
-            throw new NotImplementedException();
+            throw new InvalidOperationException();
         }
 
         public object Create(object request, ISpecimenContext context)
@@ -102,7 +86,7 @@ namespace AutoFixture.Xunit3.UnitTest.TestTypes
             return this.OnCreate(request, context);
         }
 
-        internal Func<object, ISpecimenContext, object> OnCreate { get; set; }
+        internal Func<object, ISpecimenContext, object> OnCreate { get; set; } = (_, _) => new object();
 
         internal Action<ICustomization> OnCustomize { get; set; }
     }

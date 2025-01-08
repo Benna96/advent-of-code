@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -12,14 +11,14 @@ namespace AutoFixture.Xunit3.Internal
     /// </summary>
     [SuppressMessage("Design", "CA1010:Generic interface should also be implemented",
         Justification = "Type is not a collection.")]
-    public class PropertyTestCaseSource : TestCaseSource
+    public class PropertyDataSource : DataSource
     {
         /// <summary>
-        /// Creates an instance of type <see cref="PropertyTestCaseSource"/>.
+        /// Creates an instance of type <see cref="PropertyDataSource"/>.
         /// </summary>
         /// <param name="propertyInfo"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public PropertyTestCaseSource(PropertyInfo propertyInfo)
+        public PropertyDataSource(PropertyInfo propertyInfo)
         {
             this.PropertyInfo = propertyInfo ?? throw new ArgumentNullException(nameof(propertyInfo));
         }
@@ -30,7 +29,7 @@ namespace AutoFixture.Xunit3.Internal
         public PropertyInfo PropertyInfo { get; }
 
         /// <inheritdoc />
-        protected override IEnumerable<object[]> GetTestData(DisposalTracker disposalTracker)
+        protected override IEnumerable<object[]> GetData(DisposalTracker disposalTracker)
         {
             var value = this.PropertyInfo.GetValue(null);
             if (value is not IEnumerable<object[]> enumerable)

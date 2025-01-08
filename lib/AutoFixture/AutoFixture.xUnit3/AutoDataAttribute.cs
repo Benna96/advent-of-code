@@ -63,8 +63,8 @@ namespace AutoFixture.Xunit3
         {
             if (testMethod is null) throw new ArgumentNullException(nameof(testMethod));
 
-            var result = new AutoTestCaseSource(this.FixtureFactory)
-                .GetTestCases(testMethod, disposalTracker)
+            var result = new AutoDataSource(this.FixtureFactory)
+                .GetData(testMethod, disposalTracker)
                 .Select(this.ConvertDataRow)
                 .ToArray();
 

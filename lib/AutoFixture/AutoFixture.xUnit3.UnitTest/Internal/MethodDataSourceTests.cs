@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoFixture.Xunit3.Internal;
+using AutoFixture.Xunit3.UnitTest.TestTypes;
 using TestTypeFoundation;
 using Xunit;
 using Xunit.Sdk;
 
 namespace AutoFixture.Xunit3.UnitTest.Internal
 {
-    public class MethodTestCaseSourceTests
+    public class MethodDataSourceTests
     {
         public static IEnumerable<object[]> GetTestDataFieldWithMixedValues()
         {
@@ -17,17 +19,17 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
         }
 
         [Fact]
-        public void SutIsTestCaseSource()
+        public void SutIsTestDataSource()
         {
             // Arrange
-            var methodInfo = typeof(MethodTestCaseSourceTests)
-                .GetMethod(nameof(this.SutIsTestCaseSource));
+            var methodInfo = typeof(MethodDataSourceTests)
+                .GetMethod(nameof(this.SutIsTestDataSource));
 
             // Act
-            var sut = new MethodTestCaseSource(methodInfo);
+            var sut = new MethodDataSource(methodInfo);
 
             // Assert
-            Assert.IsAssignableFrom<TestCaseSource>(sut);
+            Assert.IsAssignableFrom<DataSource>(sut);
         }
 
         [Fact]
@@ -35,31 +37,31 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
         {
             // Act & Assert
             Assert.Throws<ArgumentNullException>(() =>
-                new MethodTestCaseSource(null!));
+                new MethodDataSource(null!));
         }
 
         [Fact]
         public void ThrowsWhenArgumentsIsNull()
         {
             // Arrange
-            var methodInfo = typeof(MethodTestCaseSourceTests)
-                .GetMethod(nameof(this.SutIsTestCaseSource));
+            var methodInfo = typeof(MethodDataSourceTests)
+                .GetMethod(nameof(this.SutIsTestDataSource));
 
             // Act & Assert
             Assert.Throws<ArgumentNullException>(() =>
-                new MethodTestCaseSource(methodInfo, null!));
+                new MethodDataSource(methodInfo, null!));
         }
 
         [Fact]
         public void ConstructorSetsProperties()
         {
             // Arrange
-            var methodInfo = typeof(MethodTestCaseSourceTests)
-                .GetMethod(nameof(this.SutIsTestCaseSource));
+            var methodInfo = typeof(MethodDataSourceTests)
+                .GetMethod(nameof(this.SutIsTestDataSource));
             var arguments = new[] { new object() };
 
             // Act
-            var sut = new MethodTestCaseSource(methodInfo, arguments);
+            var sut = new MethodDataSource(methodInfo, arguments);
 
             // Assert
             Assert.Equal(methodInfo, sut.MethodInfo);
@@ -76,18 +78,35 @@ namespace AutoFixture.Xunit3.UnitTest.Internal
                 new object[] { "foo", 2, new RecordType<string>("bar") },
                 new object[] { "Han", 3, new RecordType<string>("Solo") }
             };
-            var testDataSource = typeof(MethodTestCaseSourceTests)
+            var testDataSource = typeof(MethodDataSourceTests)
                 .GetMethod(nameof(this.GetTestDataFieldWithMixedValues));
             var testData = typeof(SampleTestType)
                 .GetMethod(nameof(SampleTestType.TestMethodWithReferenceTypeParameter));
             var disposalTracker = new DisposalTracker();
-            var sut = new MethodTestCaseSource(testDataSource);
+            var sut = new MethodDataSource(testDataSource);
 
             // Act
-            var result = sut.GetTestCases(testData, disposalTracker);
+            var result = sut.GetData(testData, disposalTracker);
 
             // Assert
             Assert.Equal(expected, result);
         }
+
+        [Fact]
+        public void ThrowsWhenMemberDoesNotReturnAnEnumerableValue()
+        {
+            // Arrange
+            var dataSource = typeof(MethodDataSourceTests)
+                .GetMethod(nameof(NonEnumerableTestData));
+            var testData = typeof(SampleTestType)
+                .GetMethod(nameof(SampleTestType.TestMethodWithReferenceTypeParameter));
+            var disposalTracker = new DisposalTracker();
+            var sut = new MethodDataSource(dataSource);
+
+            Assert.Throws<InvalidCastException>(
+                () => sut.GetData(testData, disposalTracker).ToArray());
+        }
+
+        public static object NonEnumerableTestData() => new();
     }
 }

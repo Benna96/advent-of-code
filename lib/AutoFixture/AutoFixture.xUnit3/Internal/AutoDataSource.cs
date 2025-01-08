@@ -10,17 +10,17 @@ namespace AutoFixture.Xunit3.Internal
     /// <summary>
     /// Combines the values from a source with auto-generated values.
     /// </summary>
-    public class AutoTestCaseSource : ITestCaseSource
+    public class AutoDataSource : IDataSource
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AutoTestCaseSource"/> class.
+        /// Initializes a new instance of the <see cref="AutoDataSource"/> class.
         /// </summary>
         /// <param name="createFixture">The factory method for creating a fixture.</param>
-        /// <param name="source">The source of test cases to combine with auto-generated values.</param>
+        /// <param name="source">The source of test data to combine with auto-generated values.</param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="createFixture"/> is <see langword="null"/>.
         /// </exception>
-        public AutoTestCaseSource(Func<IFixture> createFixture, ITestCaseSource? source = default)
+        public AutoDataSource(Func<IFixture> createFixture, IDataSource? source = default)
         {
             this.CreateFixture = createFixture ?? throw new ArgumentNullException(nameof(createFixture));
             this.Source = source;
@@ -32,17 +32,17 @@ namespace AutoFixture.Xunit3.Internal
         public Func<IFixture> CreateFixture { get; }
 
         /// <summary>
-        /// Gets the source of test cases to combine with auto-generated values.
+        /// Gets the source of test data to combine with auto-generated values.
         /// </summary>
-        public ITestCaseSource? Source { get; }
+        public IDataSource? Source { get; }
 
         /// <summary>
-        /// Returns the combined test cases provided by the source and auto-generated values.
+        /// Returns the combined test data provided by the source and auto-generated values.
         /// </summary>
         /// <param name="method">The target method for which to provide the arguments.</param>
         /// <param name="disposalTracker">The disposal tracker used to dispose the data.</param>
         /// <returns>Returns a sequence of argument collections.</returns>
-        public IEnumerable<object[]> GetTestCases(MethodInfo method, DisposalTracker disposalTracker)
+        public IEnumerable<object[]> GetData(MethodInfo method, DisposalTracker disposalTracker)
         {
             return this.Source is null
                 ? this.GenerateValues(method)
@@ -58,15 +58,15 @@ namespace AutoFixture.Xunit3.Internal
 
         private IEnumerable<object[]> CombineValues(
             MethodInfo methodInfo,
-            ITestCaseSource source,
+            IDataSource source,
             DisposalTracker disposalTracker)
         {
             var parameters = Array.ConvertAll(methodInfo.GetParameters(), TestParameter.From);
 
-            foreach (object[] testCase in source.GetTestCases(methodInfo, disposalTracker))
+            foreach (object[] testData in source.GetData(methodInfo, disposalTracker))
             {
-                var customizations = parameters.Take(testCase.Length)
-                    .Zip(testCase, (parameter, value) => new Argument(parameter, value))
+                var customizations = parameters.Take(testData.Length)
+                    .Zip(testData, (parameter, value) => new Argument(parameter, value))
                     .Select(argument => argument.GetCustomization())
                     .Where(x => x is not NullCustomization);
 
@@ -76,11 +76,11 @@ namespace AutoFixture.Xunit3.Internal
                     fixture.Customize(customization);
                 }
 
-                var missingValues = parameters.Skip(testCase.Length)
+                var missingValues = parameters.Skip(testData.Length)
                     .Select(parameter => GenerateAutoValue(parameter, fixture))
                     .ToArray();
 
-                yield return testCase.Concat(missingValues).ToArray();
+                yield return testData.Concat(missingValues).ToArray();
             }
         }
 

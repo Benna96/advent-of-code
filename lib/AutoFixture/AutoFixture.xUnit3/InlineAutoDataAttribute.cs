@@ -55,12 +55,12 @@ namespace AutoFixture.Xunit3
         /// <inheritdoc />
         public override ValueTask<IReadOnlyCollection<ITheoryDataRow>> GetData(MethodInfo testMethod, DisposalTracker disposalTracker)
         {
-            var source = new AutoTestCaseSource(
+            var source = new AutoDataSource(
                 this.FixtureFactory,
-                new InlineTestCaseSource(this.Values));
+                new InlineDataSource(this.Values));
 
             var result = source
-                .GetTestCases(testMethod, disposalTracker)
+                .GetData(testMethod, disposalTracker)
                 .Select(this.ConvertDataRow)
                 .ToArray();
 
