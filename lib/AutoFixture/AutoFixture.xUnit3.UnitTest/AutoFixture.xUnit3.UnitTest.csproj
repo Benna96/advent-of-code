@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- From Common.props, inlined to avoid needless complexity -->
+  <PropertyGroup>
+    <LangVersion>10</LangVersion>
+  </PropertyGroup>
+
+  <!-- From Common.Test.props, inlined to avoid needless complexity -->
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+  </ItemGroup>
+
+  <!-- From Common.Test.xUnit.props, inlined to avoid needless complexity -->
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" Version="1.0.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- xUnit v3 specific -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFrameworks>net472;net48;net6.0</TargetFrameworks>
+    <AssemblyTitle>AutoFixture.xUnit.net3.UnitTest</AssemblyTitle>
+    <AssemblyName>AutoFixture.Xunit3.UnitTest</AssemblyName>
+    <RootNamespace>AutoFixture.Xunit3.UnitTest</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AutoFixture.xUnit3\AutoFixture.xUnit3.csproj" />
+    <ProjectReference Include="..\TestTypeFoundation\TestTypeFoundation.csproj" />
+  </ItemGroup>
+
+</Project>
