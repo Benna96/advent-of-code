@@ -1,11 +1,13 @@
+using System.Collections.Generic;
+
 namespace AdventOfCode.Tests;
 
-public class Day02SolverTests : PuzzleSolverTestsBase<Day02SolverTests, Day02Solver>, IPuzzleSolverTests
+public class Day02SolverTests : PuzzleSolverTests<Day02Solver, Day02SolverTests>, IPuzzleSolutionData
 {
-    static TheoryData<(string input, string solution)> IPuzzleSolverTests.Part1TestCases
+    static IEnumerable<(string input, string solution)> IPuzzleSolutionData.Part1Data
         => [(Input, "2")];
 
-    static TheoryData<(string input, string solution)> IPuzzleSolverTests.Part2TestCases
+    static IEnumerable<(string input, string solution)> IPuzzleSolutionData.Part2Data
         => [(Input, "4")];
 
     private const string Input = """
